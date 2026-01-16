@@ -161,22 +161,22 @@ st.markdown("---")
 with st.expander("📖 Instructions - Click to expand"):
     st.markdown("""
     **Required Files:**
-    1. **Details Sheet** - Must contain "details" in filename and have "Independent Claims" column
-    2. **Metadata Sheet** - Must contain "metadata" in filename
-    3. **Details.xlsx** - Must be named exactly "details.xlsx"
+    1. **Details Sheet** - Must contain "Independent Claims" column and family publication data
+    2. **Metadata Sheet** - Must contain seed patent information (with "metadata" in filename)
     
     **What this tool does:**
-    - Cleans and filters patent claims
+    - Cleans and filters patent claims from the Details sheet
     - Removes canceled, CRM, and dependent claims
+    - Processes family publication data for INPADOC lookups
     - Generates two output files:
-        - Details sheet CC.xlsx (cleaned claims)
-        - Info_Sheet_CC_[count].xlsx (processed info sheet)
+        - Details sheet CC.xlsx (cleaned claims with "Commented Claims" sheet)
+        - Info_Sheet_CC_[count].xlsx (processed info sheet with family data)
     """)
 
 st.markdown("---")
 
 # File uploaders
-col1, col2, col3 = st.columns(3)
+col1, col2 = st.columns(2)
 
 with col1:
     st.subheader("1️⃣ Details Sheet")
@@ -186,26 +186,22 @@ with col2:
     st.subheader("2️⃣ Metadata Sheet")
     metadata_file = st.file_uploader("Upload Metadata Sheet", type=['xlsx'], key="metadata")
 
-with col3:
-    st.subheader("3️⃣ Details.xlsx")
-    family_file = st.file_uploader("Upload details.xlsx", type=['xlsx'], key="family")
-
 st.markdown("---")
 
 # Process button
 if st.button("🚀 Process Files", type="primary", use_container_width=True):
-    if not all([details_file, metadata_file, family_file]):
-        st.error("⚠️ Please upload all three required files!")
+    if not all([details_file, metadata_file]):
+        st.error("⚠️ Please upload both required files!")
     else:
         try:
             with st.spinner("Processing your files... Please wait."):
                 # Process details sheet
                 cleaned_details_output = process_details_sheet(details_file)
                 
-                # Process info sheet
+                # Process info sheet - using details_file for both purposes
                 info_output, seed_count = process_info_sheet(
                     metadata_file, 
-                    family_file, 
+                    details_file,  # Using the same details file for family data
                     cleaned_details_output
                 )
                 
